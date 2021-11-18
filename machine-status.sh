@@ -65,7 +65,7 @@ function disk_space () {
     # print out disk space and memory
     echo
     echo ----- $'\033[1;36m'DISKS OVER CAPACITY OF 20% $'\033[0m'-----------------------------------------
-    df -h | head -n 1 && df -h | awk '0+$5 >= 20 {print}'
+    df -h | awk '0+$5 >= 20 {print $1, $2, $5, $6}' | column -t
 }
 
 function mem_usage () {
