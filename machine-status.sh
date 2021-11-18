@@ -3,7 +3,7 @@
 ## Preamble
 #  print out date and time -----
 
-function cur_date () {
+function print_date () {
     echo date
     echo
 }
@@ -69,20 +69,32 @@ function mem_usage () {
     echo "Memory usage: Out of ${total_mem}, in use ~${percent_mem}%"
 }
 
-function logs_status () {
-    echo
-    echo ----- ERROR LOGS ---------------------------------------------------------
+function log_status () {
+    # output: error logs up to a week ago
+    curr_date=$( date | cut -d " " -f 2-3 | date -d "$1" +%F )
+    a_week_ago=$( date -d "${curr_date} - 7 day" +%F )
 
-    journalctl -xe | grep "failed\|failed:\|error\|fail" ## it could check for services. 
+    echo "Error logs from this past week -------"
+    errors=$(journalctl -xe | grep "failed\|failed:\|error\|fail") ## it could check for services. 
+
+    i=${curr_date}
+    while [[ ${i} != ${a_week_ago} ]]
+    do
+        temp_date=$( date --date="${i}" +%c | awk  '{print $3, $2}')
+        echo ${errors} | grep ${temp_date} # | awk '{print $0, "\n"}'  # prints new line after each grep.
+        echo "" 
+        i=$( date -d "${i} - 1 day" +%F )
+    done
+
 } 
     
 function main (){
-    cur_date
+    print_date
     preamble
     services
     disk_space
     mem_usage
-    logs_status
+    log_status
 } 
 
 main
