@@ -73,7 +73,7 @@ function logs_status () {
     journalctl -xe | grep "failed\|failed:\|error\|fail" ## it could check for services. 
 } 
     
-function main {
+function main (){
     cur_date
     preamble
     services
