@@ -81,7 +81,7 @@ function log_status () {
     while [[ ${i} != ${a_week_ago} ]]
     do
         temp_date=$( date --date="${i}" +%c | awk  '{print $3, $2}')
-        echo ${errors} | grep ${temp_date} # | awk '{print $0, "\n"}'  # prints new line after each grep.
+        echo ${errors} | grep "${temp_date}" # | awk '{print $0, "\n"}'  # prints new line after each grep.
         echo "" 
         i=$( date -d "${i} - 1 day" +%F )
     done
