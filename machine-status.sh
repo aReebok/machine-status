@@ -61,14 +61,12 @@ function disk_space () {
 
 function mem_usage () {
     # output: mem_usage: out of Xgb, in use ~Y%
-    total_mem=$(free -th | grep "Total" | cut -d " " -f 11)
-    total_mem_n=$(echo ${total_mem} | sed 's/[^0-9]*//g')
-    used_mem=$(free -th | grep "Total" | cut -d " " -f 19)
-    used_mem_n=$(echo ${used_mem} | sed 's/[^0-9]*//g')
+    total_mem=$(free -th | grep "Total" | awk '{print $2}' | numfmt --from=iec) 
+    used_mem=$(free -th | grep "Total" | awk '{print $3}' | numfmt --from=iec)
+    percent_mem=$( echo "${used_mem} * 100 / ${total_mem}" | bc | numfmt --to=iec)
 
-    percent_mem=$( echo "scale=0; ${used_mem_n}*100 / ${total_mem_n}"  | bc )
-
-    echo "Memory usage: Out of ${total_mem}, in use ~${percent_mem}%"
+    echo "Memory usage: Out of $(echo "${total_mem}" | numfmt --to=iec), in use ~ ${percent_mem}%"
+    
 }
 
 function log_status () {
