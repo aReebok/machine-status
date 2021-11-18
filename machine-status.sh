@@ -58,12 +58,15 @@ function disk_space () {
 }
 
 function mem_usage () {
-    echo
-    echo ----- MEMORY USAGE -------------------------------------------------------
-    for line in "total" "Mem:" "Swap:" "Total:"
-    do
-        free -th | grep ${line} | cut -d " " -f -35 | tr '\n' ' ' && free -th | grep ${line} | cut -d " " -f 40-50
-    done
+    # output: mem_usage: out of Xgb, in use ~Y%
+    total_mem=$(free -th | grep "Total" | cut -d " " -f 11)
+    total_mem_n=$(echo ${total_mem} | sed 's/[^0-9]*//g')
+    used_mem=$(free -th | grep "Total" | cut -d " " -f 19)
+    used_mem_n=$(echo ${used_mem} | sed 's/[^0-9]*//g')
+
+    percent_mem=$( echo "scale=0; ${used_mem_n}*100 / ${total_mem_n}"  | bc )
+
+    echo "Memory usage: Out of ${total_mem}, in use ~${percent_mem}%"
 }
 
 function logs_status () {
@@ -83,6 +86,3 @@ function main (){
 } 
 
 main
-
-#jiwon
-#from areeba's branch test
