@@ -23,7 +23,7 @@ function preamble () {
     function ntp_status () {
         #  print out NTP status    -----
         echo ----- $'\033[1;36m'Services $'\033[0m'----------------------------$
-        echo -n " NTP: " 
+        echo -n ">>   NTP: " 
         timedatectl status | grep "NTP"
 
         if [ $? = 1 ]
@@ -50,6 +50,15 @@ function preamble () {
 function services () {
     ntp_status
     fail2ban
+}
+
+function root_space() {
+    root_name=$(df -h | grep root | awk '{print $1}')
+    root_size=$(df -h | grep root | awk '{print $2}')
+    root_usage=$(df -h | grep root | awk '{print $5}')
+    echo 
+    echo ----- $'\033[1;36m'ROOT SPACE $'\033[0m'--------------
+    echo "root (/) of size ${root_size} is ${root_usage} full."
 }
 
 function disk_space () {
@@ -92,6 +101,7 @@ function main (){
     print_date
     preamble
     services
+    root_space
     disk_space
     mem_usage
     log_status
