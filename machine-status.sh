@@ -3,7 +3,7 @@
 ## Preamble
 #  print out date and time -----
 
-function cur_date () {
+function print_date () {
     echo date
     echo
 }
@@ -69,30 +69,42 @@ function disk_space () {
 }
 
 function mem_usage () {
-    echo
-    echo ----- MEMORY USAGE -------------------------------------------------------
-    for line in "total" "Mem:" "Swap:" "Total:"
-    do
-        free -th | grep ${line} | cut -d " " -f -35 | tr '\n' ' ' && free -th | grep ${line} | cut -d " " -f 40-50
-    done
+    # output: mem_usage: out of Xgb, in use ~Y%
+    total_mem=$(free -th | grep "Total" | awk '{print $2}' | numfmt --from=iec) 
+    used_mem=$(free -th | grep "Total" | awk '{print $3}' | numfmt --from=iec)
+    percent_mem=$( echo "${used_mem} * 100 / ${total_mem}" | bc | numfmt --to=iec)
+
+    echo "Memory usage: Out of $(echo "${total_mem}" | numfmt --to=iec), in use ~ ${percent_mem}%"
+    
 }
 
-function logs_status () {
-    echo
-    echo ----- ERROR LOGS ---------------------------------------------------------
+function log_status () {
+    # output: error logs up to a week ago
+    curr_date=$( date | cut -d " " -f 2-3 | date -d "$1" +%F )
+    a_week_ago=$( date -d "${curr_date} - 7 day" +%F )
 
-    journalctl -xe | grep "failed\|failed:\|error\|fail" ## it could check for services. 
+    echo "Error logs from this past week -------"
+    errors=$(journalctl -xe | grep "failed\|failed:\|error\|fail") ## it could check for services. 
+
+    i=${curr_date}
+    while [[ ${i} != ${a_week_ago} ]]
+    do
+        temp_date=$( date --date="${i}" +%c | awk  '{print $3, $2}')
+        echo ${errors} | grep ${temp_date} # | awk '{print $0, "\n"}'  # prints new line after each grep.
+        echo "" 
+        i=$( date -d "${i} - 1 day" +%F )
+    done
+
 } 
     
 function main (){
-    cur_date
+    print_date
     preamble
     services
     root_space
     disk_space
     mem_usage
-    logs_status
+    log_status
 } 
 
 main
-
