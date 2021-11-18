@@ -70,8 +70,8 @@ function disk_space () {
 
 function mem_usage () {
     # output: mem_usage: out of Xgb, in use ~Y%
-    total_mem=$(free -th | grep "Total" | awk '{print $2}' | numfmt --from=iec) 
-    used_mem=$(free -th | grep "Total" | awk '{print $3}' | numfmt --from=iec)
+    total_mem=$(free -th | grep "Mem:" | awk '{print $2}' | numfmt --from=iec) 
+    used_mem=$(free -th | grep "Mem:" | awk '{print $3}' | numfmt --from=iec)
     percent_mem=$( echo "${used_mem} * 100 / ${total_mem}" | bc | numfmt --to=iec)
 
     echo "Memory usage: Out of $(echo "${total_mem}" | numfmt --to=iec), in use ~ ${percent_mem}%"
