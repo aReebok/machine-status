@@ -22,16 +22,18 @@ function preamble () {
 ### SERVICES 
     function ntp_status () {
         #  print out NTP status    -----
+        echo ----- $'\033[1;36m'Services $'\033[0m'----------------------------$
+        echo -n " NTP: " 
         timedatectl status | grep "NTP"
 
         if [ $? = 1 ]
         then
-            echo --- NTP not set up
+            echo $'\033[0;31m'NTP not set up.$'\033[0m'
+        else
+                echo "NTP is set up"
         fi
 
-        echo
-    }
-
+}        
     function fail2ban () {
         echo -n ">>  fail2ban: "
 
