@@ -89,13 +89,8 @@ function log_status () {
     i=${curr_date}
     while [[ ${i} != ${a_week_ago} ]]
     do
-<<<<<<< HEAD
-        temp_date=$( date --date="${i}" +%c | awk  '{print $3}')
-        echo ${errors} | grep "${temp_date}" # | awk 'BEGIN{FS="${temp_date};OFS=\"\n=> ${temp_date}"}'  # | awk '{print $0, "\n"}'  # prints new line after each grep.
-=======
         temp_date=$( date --date="${i}" +%c | awk  '{print $3, $2}')
         echo ${errors} | grep "${temp_date}"   # | awk '{print $0, "\n"}'  # prints new line after each grep.
->>>>>>> areeba
 
         i=$( date -d "${i} - 1 day" +%F )
     done
