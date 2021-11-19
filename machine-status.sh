@@ -81,21 +81,22 @@ function mem_usage () {
 function log_status () {
     # output: error logs up to n days ago
 
-    n_days=15
+    n_days=10
     curr_date=$( date | cut -d " " -f 2-3 | date -d "$1" +%F )
     a_week_ago=$( date -d "${curr_date} - ${n_days} day" +%F )
 
     echo "Error logs from ${n_days} day{s} from today -------"
-    errors=$(journalctl -xe | grep "failed\|failed:\|error\|fail") ## it could check for services. 
+    errors="$(journalctl -xe | grep "failed\|failed:\|error\|fail")" ## it could check for services. 
 
     i=${curr_date}
     while [[ ${i} != ${a_week_ago} ]]
     do
         temp_date=$( date --date="${i}" +%c | awk  '{print $3, $2}')
         log_output=$( echo ${errors} | grep "${temp_date}" )   # | awk '{print $0, "\n"}'  # prints new line after each grep.
-        log_output="${log_output//${temp_date}/$'\n'${temp_date}}"
+        log_output="${log_output//${temp_date}/$'\n'${temp_date}}" # needed to print new lines for every output 
         if [[ $( echo ${log_output} | awk '{print length}' ) != 0 ]]; then
-            echo "$log_output"      # does not print extra lines
+            echo -n "$temp_date"
+            echo "$log_output" | cut -d ";" -f 1 | awk '{$1=$2=$3=$4=$5=""; print $0}'
         fi
 
         i=$( date -d "${i} - 1 day" +%F )
