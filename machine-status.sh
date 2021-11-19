@@ -64,8 +64,8 @@ function root_space() {
 function disk_space () {
     # print out disk space and memory
     echo
-    echo ----- $'\033[1;36m'DISKS OVER CAPACITY OF 20% $'\033[0m'-----------------------------------------
-    df -h | head -n 1 && df -h | awk '0+$5 >= 20 {print}'
+    echo ----- $'\033[1;36m'DISKS OVER CAPACITY OF 80% $'\033[0m'-----------------------------------------
+    df -h | awk '0+$5 >= 80 {print $1, $2, $5, $6}' | column -t
 }
 
 function mem_usage () {
@@ -81,7 +81,7 @@ function mem_usage () {
 function log_status () {
     # output: error logs up to a week ago
     curr_date=$( date | cut -d " " -f 2-3 | date -d "$1" +%F )
-    a_week_ago=$( date -d "${curr_date} - 7 day" +%F )
+    a_week_ago=$( date -d "${curr_date} - 30 day" +%F )
 
     echo "Error logs from this past week -------"
     errors=$(journalctl -xe | grep "failed\|failed:\|error\|fail") ## it could check for services. 
