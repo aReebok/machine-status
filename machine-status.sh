@@ -42,20 +42,17 @@ function services () {
 }
 
 function disk_space() {
-    timeout 5s bash <<EOT
-        df_lines=$(df -h)
-        root_line=$(df_lines | grep -w '/')
-            root_name=$(root_line | awk '{print $1}')
-            root_size=$(root_line | awk '{print $2}')
-            root_usage=$(root_line | awk '{print $5}')
-            echo ROOT SPACE
-            echo "root (/) of size ${root_size} is ${root_usage} full.\n"
-        # print out disk space and memory
-        echo DISKS OVER CAPACITY OF 80%
-            ${df_lines} | awk '0+$5 >= 80 {print $1, $2, $5, $6}' | column -t
-            echo
-
-    EOT
+    df_lines=$(df -h)
+    root_line=$(df_lines | grep -w '/')
+        root_name=$(root_line | awk '{print $1}')
+        root_size=$(root_line | awk '{print $2}')
+        root_usage=$(root_line | awk '{print $5}')
+        echo ROOT SPACE
+        echo "root (/) of size ${root_size} is ${root_usage} full.\n"
+    # print out disk space and memory
+    echo DISKS OVER CAPACITY OF 80%
+        ${df_lines} | awk '0+$5 >= 80 {print $1, $2, $5, $6}' | column -t
+        echo
 }
 
 
@@ -100,7 +97,8 @@ function main (){
     date
     preamble
     services
-    disk_space
+    export -f disk_space
+    timeout 5s bash -C disk_space
     mem_usage
     log_status
 } 
