@@ -3,16 +3,13 @@
 ## Preamble
 #  print out date and time -----
 
-function print_date () {
-    echo ${date}
-    echo
-}
 
 function preamble () {
     #  print out hostname and ip address
+    echo 
+    date
     echo -n "Hostname: ${HOSTNAME} @ ip address: "
     ip ad | grep 127.0.0. | cut -d " " -f 6 | cut -d "/" -f 1 | head -n 1
-    echo 
     hostnamectl | grep "Operating System"
     echo
 }
@@ -27,7 +24,6 @@ function preamble () {
         then
             echo "NTP not set up."
         fi
-        echo
 }        
     function fail2ban () {
         echo -n ">>  fail2ban: "
@@ -48,9 +44,9 @@ function services () {
 }
 
 function root_space() {
-    root_name=$(df -h | grep -f '/' | awk '{print $1}')
-    root_size=$(df -h | grep -f '/' | awk '{print $2}')
-    root_usage=$(df -h | grep -f '/' | awk '{print $5}')
+    root_name=$(df -h | grep -w '/' | awk '{print $1}')
+    root_size=$(df -h | grep -w '/' | awk '{print $2}')
+    root_usage=$(df -h | grep -w '/' | awk '{print $5}')
     echo ROOT SPACE
     echo "root (/) of size ${root_size} is ${root_usage} full."
     echo
@@ -67,10 +63,11 @@ function mem_usage () {
     # output: mem_usage: out of Xgb, in use ~Y%
     total_mem=$(free -th | grep "Mem:" | awk '{print $2}' | numfmt --from=iec) 
     used_mem=$(free -th | grep "Mem:" | awk '{print $3}' | numfmt --from=iec)
-    percent_mem=$( echo "${used_mem} * 100 / ${total_mem}" | bc | numfmt --to=iec)
+    percent_mem=$((used_mem * 100))
+    percent_mem=$((percent_mem / total_mem))
 
-    echo "Memory usage: Out of $(echo "${total_mem}" | numfmt --to=iec), in use ~ ${percent_mem}%"
-    
+    echo "Memory usage: Out of $(echo "${total_mem}" | numfmt --to=iec), in use is $(echo "${used_mem}" | numfmt --to=iec) ~ ${percent_mem}%"
+    echo
 }
 
 function log_status () {
@@ -100,7 +97,6 @@ function log_status () {
 } 
     
 function main (){
-    print_date
     preamble
     services
     root_space
