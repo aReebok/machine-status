@@ -41,20 +41,22 @@ function services () {
     fail2ban
 }
 
-function root_space() {
-    root_name=$(df -h | grep -w '/' | awk '{print $1}')
-    root_size=$(df -h | grep -w '/' | awk '{print $2}')
-    root_usage=$(df -h | grep -w '/' | awk '{print $5}')
-    echo ROOT SPACE
-    echo "root (/) of size ${root_size} is ${root_usage} full."
-    echo
+function disk_space() {
+    df_lines=$(df -h)
+    root_line=$(df -h | grep -w '/')
+        root_name=$(root_line | awk '{print $1}')
+        root_size=$(root_line | awk '{print $2}')
+        root_usage=$(root_line | awk '{print $5}')
+        echo ROOT SPACE
+        echo "root (/) of size ${root_size} is ${root_usage} full.\n"
+    # print out disk space and memory
+    echo DISKS OVER CAPACITY OF 80%
+        ${df_lines} | awk '0+$5 >= 80 {print $1, $2, $5, $6}' | column -t
+        echo
 }
 
 function disk_space () {
-    # print out disk space and memory
-    echo DISKS OVER CAPACITY OF 80%
-    df -h | awk '0+$5 >= 80 {print $1, $2, $5, $6}' | column -t
-    echo
+
 }
 
 function mem_usage () {
@@ -98,8 +100,7 @@ function main (){
     date
     preamble
     services
-    root_space
-    disk_space
+    timeout 5s disk_space
     mem_usage
     log_status
 } 
