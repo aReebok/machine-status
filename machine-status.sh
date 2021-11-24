@@ -55,9 +55,6 @@ function disk_space() {
         echo
 }
 
-function disk_space () {
-
-}
 
 function mem_usage () {
     # output: mem_usage: out of Xgb, in use ~Y%
