@@ -6,8 +6,6 @@
 
 function preamble () {
     #  print out hostname and ip address
-    echo 
-    date
     echo -n "Hostname: ${HOSTNAME} @ ip address: "
     ip ad | grep 127.0.0. | cut -d " " -f 6 | cut -d "/" -f 1 | head -n 1
     hostnamectl | grep "Operating System"
@@ -97,6 +95,7 @@ function log_status () {
 } 
     
 function main (){
+    date
     preamble
     services
     root_space
