@@ -86,6 +86,9 @@ function main() {
     preamble
     services
     timeout 5s ./disk_space.sh
+        if [ $? != 0 ]; then 
+            echo "Disk command 'df -h' timed out "
+        fi
     mem_usage
     log_status
 }
