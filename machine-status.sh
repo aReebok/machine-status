@@ -41,20 +41,6 @@ function services () {
     fail2ban
 }
 
-function disk_space() {
-    df_lines=$(df -h)
-    root_line=$(df_lines | grep -w '/')
-        root_name=$(root_line | awk '{print $1}')
-        root_size=$(root_line | awk '{print $2}')
-        root_usage=$(root_line | awk '{print $5}')
-        echo ROOT SPACE
-        echo "root (/) of size ${root_size} is ${root_usage} full.\n"
-    # print out disk space and memory
-    echo DISKS OVER CAPACITY OF 80%
-        ${df_lines} | awk '0+$5 >= 80 {print $1, $2, $5, $6}' | column -t
-        echo
-}
-
 
 function mem_usage () {
     # output: mem_usage: out of Xgb, in use ~Y%
@@ -74,7 +60,7 @@ function log_status () {
     curr_date=$( date | cut -d " " -f 2-3 | date -d "$1" +%F )
     a_week_ago=$( date -d "${curr_date} - ${n_days} day" +%F )
 
-    echo "Error logs from ${n_days} day{s} from today -------"
+    echo "Error logs from ${n_days} day{s} from today "
     errors="$(journalctl -xe | grep "failed\|failed:\|error\|fail")" ## it could check for services. 
 
     i=${curr_date}
@@ -93,14 +79,30 @@ function log_status () {
 
 } 
     
-function main (){
-    date
-    preamble
-    services
-    export -f disk_space
-    timeout 5s bash -C disk_space
-    mem_usage
-    log_status
-} 
 
-main
+## main output: 
+
+date
+preamble
+services
+
+timeout 5s bash <<EOT
+    function disk_space() {
+        df_lines=$(df -h)
+        root_line=$(df_lines | grep -w '/')
+            root_name=$(root_line | awk '{print $1}')
+            root_size=$(root_line | awk '{print $2}')
+            root_usage=$(root_line | awk '{print $5}')
+            echo ROOT SPACE
+            echo "root (/) of size ${root_size} is ${root_usage} full.\n"
+        # print out disk space and memory
+        echo DISKS OVER CAPACITY OF 80%
+            ${df_lines} | awk '0+$5 >= 80 {print $1, $2, $5, $6}' | column -t
+            echo
+    }
+
+    disk_space
+EOT
+
+mem_usage
+log_status
