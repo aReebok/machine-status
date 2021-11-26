@@ -6,23 +6,24 @@
 
 function preamble () {
     #  print out hostname and ip address
-    echo -n "Hostname: ${HOSTNAME} @ ip address: "
-    ip ad | grep 127.0.0. | cut -d " " -f 6 | cut -d "/" -f 1 | head -n 1
+    ip_address=$(ip ad | grep 162.210.90. | cut -d " " -f 6 | cut -d "/" -f 1 | head -n 1)
+    echo  ">>  ${HOSTNAME} [${ip_address}]"
+    echo -n ">>"
     hostnamectl | grep "Operating System"
     echo
 }
 
-### SERVICES 
+    ### SERVICES
     function ntp_status () {
         #  print out NTP status    -----
         echo SERVICES
-        echo -n ">>  " 
+        echo -n ">>  "
         timedatectl status | grep "NTP"
         if [ $? = 1 ]
         then
             echo "NTP not set up."
         fi
-}        
+    }
     function fail2ban () {
         echo -n ">>  fail2ban: "
 
@@ -33,7 +34,7 @@ function preamble () {
         else
             echo "not set up."
         fi
-        echo 
+        echo
     }
 
 function services () {
@@ -44,12 +45,14 @@ function services () {
 
 function mem_usage () {
     # output: mem_usage: out of Xgb, in use ~Y%
-    total_mem=$(free -th | grep "Mem:" | awk '{print $2}' | numfmt --from=iec) 
-    used_mem=$(free -th | grep "Mem:" | awk '{print $3}' | numfmt --from=iec)
+    total_mem=$(sudo free -th | grep "Mem:" | awk '{print $2}' | numfmt --from=iec)
+    used_mem=$(sudo free -th | grep "Mem:" | awk '{print $3}' | numfmt --from=iec)
     percent_mem=$((used_mem * 100))
     percent_mem=$((percent_mem / total_mem))
 
-    echo "Memory usage: Out of $(echo "${total_mem}" | numfmt --to=iec), in use is $(echo "${used_mem}" | numfmt --to=iec) ~ ${percent_mem}%"
+    echo "Memory usage"
+        echo ">>  ${percent_mem}% in use [$(echo "${used_mem}" | numfmt --to=iec) / $(echo "${total_mem}"  | numfmt --to=iec)] "
+#"Out of $(echo "${total_mem}" | numfmt --to=iec), in use is $(echo "${used_mem}" | numfmt --to=iec) ~ ${percent_mem}%"
     echo
 }
 
@@ -61,36 +64,38 @@ function log_status () {
     a_week_ago=$( date -d "${curr_date} - ${n_days} day" +%F )
 
     echo "Error logs from ${n_days} day{s} from today "
-    errors="$(journalctl -xe | grep "failed\|failed:\|error\|fail")" ## it could check for services. 
-
+    #errors="$(sudo journalctl -xe | grep "failed\|failed:\|error\|fail")" ## it could check for services.
+        errors=$( sudo cat /var/log/auth.log | grep "failed" )
     i=${curr_date}
     while [[ ${i} != ${a_week_ago} ]]
     do
         temp_date=$( date --date="${i}" +%c | awk  '{print $3, $2}')
         log_output=$( echo ${errors} | grep "${temp_date}" )   # | awk '{print $0, "\n"}'  # prints new line after each grep.
-        log_output="${log_output//${temp_date}/$'\n'${temp_date}}" # needed to print new lines for every output 
+        log_output="${log_output//${temp_date}/$'\n'${temp_date}}" # needed to print new lines for every output
         if [[ $( echo ${log_output} | awk '{print length}' ) != 0 ]]; then
-            echo -n "$temp_date"
-            echo "$log_output" | cut -d ";" -f 1 | awk '{$1=$2=$3=$4=$5=""; print $0}'
+            echo
+            echo  "--------------------------- $temp_date ---------------------------------"
+            echo "$log_output"  #| awk '{$1=$2=$3=$4=$5=""; print $0}'
+            echo
         fi
 
         i=$( date -d "${i} - 1 day" +%F )
     done
 
-} 
-    
+}
 
-## main output: 
+
+## main output:
 function main() {
     date
     preamble
     services
     timeout 5s ./disk_space.sh
-        if [ $? != 0 ]; then 
+        if [ $? != 0 ]; then
             echo "Disk command 'df -h' timed out "
+            echo
         fi
     mem_usage
-    log_status
 }
 
 main
