@@ -98,4 +98,4 @@ function main() {
     mem_usage
 }
 
-main
+main > /home/bw-admin/machine-status-report.doc
