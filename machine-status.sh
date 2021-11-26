@@ -42,6 +42,25 @@ function services () {
     fail2ban
 }
 
+function disk_space() {
+    echo "Checking disk space..."
+
+    root_line=$(df -h | grep -w '/')
+    root_name=$(echo ${root_line} | awk '{print $1}')
+    root_size=$(echo ${root_line} | awk '{print $2}')
+    root_usage_percent=$(echo ${root_line} | awk '{print $5}')
+    root_usage=$(echo ${root_line} | awk '{print $3}')
+
+    #echo ROOT SPACE
+    echo ">>  ${root_usage_percent} of root (/) in use [${root_usage}/${root_size}]"
+
+    #root (/) of size ${root_size} is ${root_usage} full."
+    # print out disk space and memory
+    #echo DISKS OVER CAPACITY OF 80%
+    #df -h | awk '0+$5 >= 80 {print $1, $2, $5, $6}' | column -t
+
+    echo
+}
 
 function mem_usage () {
     # output: mem_usage: out of Xgb, in use ~Y%
@@ -51,7 +70,7 @@ function mem_usage () {
     percent_mem=$((percent_mem / total_mem))
 
     echo "Memory usage"
-        echo ">>  ${percent_mem}% in use [$(echo "${used_mem}" | numfmt --to=iec) / $(echo "${total_mem}"  | numfmt --to=iec)] "
+        echo ">>  ${percent_mem}% in use [$(echo "${used_mem}" | numfmt --to=iec)/$(echo "${total_mem}"  | numfmt --to=iec)] "
 #"Out of $(echo "${total_mem}" | numfmt --to=iec), in use is $(echo "${used_mem}" | numfmt --to=iec) ~ ${percent_mem}%"
     echo
 }
@@ -86,16 +105,20 @@ function log_status () {
 
 
 ## main output:
+
 function main() {
     date
     preamble
     services
-    timeout 5s ./disk_space.sh
+    timeout 5 df -h > /dev/null 2>&1
         if [ $? != 0 ]; then
             echo "Disk command 'df -h' timed out "
             echo
+        else
+                disk_space
         fi
     mem_usage
+        log_status > log-status-report.doc
 }
 
 main > /home/bw-admin/machine-status-report.doc
